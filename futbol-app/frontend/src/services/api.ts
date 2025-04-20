@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Jugador, Asistencia, Elemento, ElementoAsignado, Partido, Estadistica, EstadisticasJugador, EstadisticasPartido, Asignacion } from '../types/index';
+import { Jugador, Asistencia, Partido, Estadistica, EstadisticasJugador, EstadisticasPartido } from '../types/index';
 
 const api = axios.create({
     baseURL: 'http://localhost:8000'
@@ -21,27 +21,6 @@ export const createAsistencia = (asistencia: Omit<Asistencia, 'id'>) =>
     api.post<Asistencia>('/asistencias', asistencia).then(res => res.data);
 export const getAsistenciasJugador = (jugadorId: number) =>
     api.get<Asistencia[]>(`/asistencias/jugador/${jugadorId}`).then(res => res.data);
-
-// Elementos
-export const getElementos = () =>
-    api.get<Elemento[]>('/elementos').then(res => res.data);
-export const createElemento = (elemento: Omit<Elemento, 'id'>) =>
-    api.post<Elemento>('/elementos', elemento).then(res => res.data);
-export const updateElemento = async (id: number, elemento: Omit<Elemento, 'id'>): Promise<Elemento> => {
-    const response = await api.put(`/elementos/${id}`, elemento);
-    return response.data;
-};
-export const deleteElemento = async (id: number): Promise<void> => {
-    await api.delete(`/elementos/${id}`);
-};
-
-// Asignaciones
-export const asignarElemento = (asignacion: Omit<ElementoAsignado, 'id'>) =>
-    api.post<ElementoAsignado>('/asignaciones', asignacion).then(res => res.data);
-export const devolverElemento = (asignacionId: number) =>
-    api.put(`/asignaciones/devolver/${asignacionId}`).then(res => res.data);
-export const getAsignacionesPendientes = () =>
-    api.get<ElementoAsignado[]>('/asignaciones/pendientes').then(res => res.data);
 
 // Servicios para Partidos
 export const getPartidos = async (): Promise<Partido[]> => {
@@ -100,22 +79,4 @@ export const registrarEstadisticasMultiple = async (estadisticas: Omit<Estadisti
 export const getEstadisticasPartido = async (partidoId: number): Promise<EstadisticasPartido> => {
     const response = await api.get(`/estadisticas/partidos/${partidoId}`);
     return response.data;
-};
-
-export const createAsignacion = async (asignacion: Omit<Asignacion, 'id' | 'activo'>): Promise<Asignacion> => {
-    const response = await api.post('/asignaciones', asignacion);
-    return response.data;
-};
-
-export const deleteAsignacion = async (jugadorId: number, elementoId: number): Promise<void> => {
-    await api.delete(`/asignaciones/desasignar/${jugadorId}/${elementoId}`);
-};
-
-export const getAsignaciones = async (jugadorId: number): Promise<Elemento[]> => {
-    const response = await api.get(`/asignaciones/jugador/${jugadorId}`);
-    return response.data;
-};
-
-export const rotateElementos = async (): Promise<void> => {
-    await api.post('/asignaciones/rotar');
 }; 

@@ -37,6 +37,8 @@ export default function JugadoresList({ jugadores }: JugadoresListProps) {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [open, setOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [jugadorToDelete, setJugadorToDelete] = useState<Jugador | null>(null);
     const [editJugador, setEditJugador] = useState<Jugador | null>(null);
     const [nombre, setNombre] = useState('');
     const queryClient = useQueryClient();
@@ -91,6 +93,24 @@ export default function JugadoresList({ jugadores }: JugadoresListProps) {
         } else {
             createMutation.mutate({ nombre, activo: true });
         }
+    };
+
+    const handleDeleteClick = (jugador: Jugador) => {
+        setJugadorToDelete(jugador);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        if (jugadorToDelete) {
+            deleteMutation.mutate(jugadorToDelete.id);
+            setDeleteDialogOpen(false);
+            setJugadorToDelete(null);
+        }
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteDialogOpen(false);
+        setJugadorToDelete(null);
     };
 
     const renderMobileView = () => (
@@ -156,7 +176,7 @@ export default function JugadoresList({ jugadores }: JugadoresListProps) {
                                     <EditIcon />
                                 </IconButton>
                                 <IconButton 
-                                    onClick={() => deleteMutation.mutate(jugador.id)}
+                                    onClick={() => handleDeleteClick(jugador)}
                                     sx={{ 
                                         color: theme.palette.error.main,
                                         '&:hover': { 
@@ -248,7 +268,7 @@ export default function JugadoresList({ jugadores }: JugadoresListProps) {
                                     <EditIcon />
                                 </IconButton>
                                 <IconButton 
-                                    onClick={() => deleteMutation.mutate(jugador.id)}
+                                    onClick={() => handleDeleteClick(jugador)}
                                     sx={{ 
                                         color: theme.palette.error.main,
                                         '&:hover': { 
@@ -345,6 +365,51 @@ export default function JugadoresList({ jugadores }: JugadoresListProps) {
                         }}
                     >
                         {editJugador ? 'Guardar' : 'Crear'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog 
+                open={deleteDialogOpen} 
+                onClose={handleDeleteCancel}
+                PaperProps={{
+                    sx: {
+                        borderRadius: 2,
+                        minWidth: { xs: '90%', sm: 400 },
+                        maxWidth: '90%'
+                    }
+                }}
+            >
+                <DialogTitle sx={{ pb: 1 }}>
+                    Confirmar eliminación
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        ¿Estás seguro que deseas eliminar al jugador {jugadorToDelete?.nombre}? Esta acción no se puede deshacer.
+                    </Typography>
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 3 }}>
+                    <Button 
+                        onClick={handleDeleteCancel}
+                        sx={{ 
+                            color: theme.palette.text.secondary,
+                            '&:hover': { 
+                                bgcolor: alpha(theme.palette.text.secondary, 0.1) 
+                            }
+                        }}
+                    >
+                        Cancelar
+                    </Button>
+                    <Button 
+                        onClick={handleDeleteConfirm} 
+                        variant="contained"
+                        color="error"
+                        sx={{
+                            textTransform: 'none',
+                            px: 3
+                        }}
+                    >
+                        Eliminar
                     </Button>
                 </DialogActions>
             </Dialog>

@@ -7,12 +7,6 @@ class TipoEvento(str, Enum):
     ENTRENAMIENTO = "ENTRENAMIENTO"
     PARTIDO = "PARTIDO"
 
-class TipoElemento(str, Enum):
-    PELOTA = "PELOTA"
-    PECHERA = "PECHERA"
-    AGUA = "AGUA"
-    CONJUNTO = "CONJUNTO"
-
 # Definir referencias adelantadas
 EstadisticaRef = ForwardRef('Estadistica')
 PartidoRef = ForwardRef('Partido')
@@ -41,37 +35,6 @@ class AsistenciaCreate(AsistenciaBase):
 class Asistencia(AsistenciaBase):
     id: int
     jugador_id: int
-
-    class Config:
-        from_attributes = True
-
-class ElementoBase(BaseModel):
-    nombre: str
-    descripcion: Optional[str] = None
-    tipo: TipoElemento
-    cantidad: int
-
-class ElementoCreate(ElementoBase):
-    pass
-
-class Elemento(ElementoBase):
-    id: int
-
-    class Config:
-        from_attributes = True
-
-class ElementoAsignadoBase(BaseModel):
-    jugador_id: int
-    elemento_id: int
-    fecha_asignacion: date
-    fecha_devolucion: Optional[date] = None
-    devuelto: bool = False
-
-class ElementoAsignadoCreate(ElementoAsignadoBase):
-    pass
-
-class ElementoAsignado(ElementoAsignadoBase):
-    id: int
 
     class Config:
         from_attributes = True
@@ -132,28 +95,6 @@ class EstadisticasPartido(BaseModel):
     goles_favor: int
     goles_contra: int
     jugadores: List[Estadistica]
-
-class AsignacionBase(BaseModel):
-    jugador_id: int
-    elemento_id: int
-    fecha_asignacion: date = Field(default_factory=date.today)
-    activo: bool = True
-
-class AsignacionCreate(AsignacionBase):
-    pass
-
-class Asignacion(AsignacionBase):
-    id: int
-
-    class Config:
-        from_attributes = True
-
-class AsignacionResponse(Asignacion):
-    jugador: Jugador
-    elemento: Elemento
-
-    class Config:
-        from_attributes = True
 
 # Actualizar las referencias adelantadas
 Partido.update_forward_refs()

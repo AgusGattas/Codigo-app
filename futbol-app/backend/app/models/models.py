@@ -12,9 +12,7 @@ class Jugador(Base):
     nombre = Column(String, index=True)
     activo = Column(Boolean, default=True)
     asistencias = relationship("Asistencia", back_populates="jugador")
-    elementos_asignados = relationship("ElementoAsignado", back_populates="jugador")
     estadisticas = relationship("Estadistica", back_populates="jugador")
-    asignaciones = relationship("Asignacion", back_populates="jugador")
 
 class Asistencia(Base):
     __tablename__ = "asistencias"
@@ -26,31 +24,6 @@ class Asistencia(Base):
     presente = Column(Boolean, default=True)
     
     jugador = relationship("Jugador", back_populates="asistencias")
-
-class Elemento(Base):
-    __tablename__ = "elementos"
-
-    id = Column(Integer, primary_key=True, index=True)
-    nombre = Column(String, index=True)
-    descripcion = Column(String)
-    tipo = Column(Enum('PELOTA', 'PECHERA', 'AGUA', 'CONJUNTO', name='tipo_elemento'))
-    cantidad = Column(Integer)
-    activo = Column(Boolean, default=True)
-    asignaciones = relationship("Asignacion", back_populates="elemento")
-    elementos_asignados = relationship("ElementoAsignado", back_populates="elemento")
-
-class ElementoAsignado(Base):
-    __tablename__ = "elementos_asignados"
-
-    id = Column(Integer, primary_key=True, index=True)
-    jugador_id = Column(Integer, ForeignKey("jugadores.id"))
-    elemento_id = Column(Integer, ForeignKey("elementos.id"))
-    fecha_asignacion = Column(Date)
-    fecha_devolucion = Column(Date, nullable=True)
-    devuelto = Column(Boolean, default=False)
-
-    jugador = relationship("Jugador", back_populates="elementos_asignados")
-    elemento = relationship("Elemento", back_populates="elementos_asignados")
 
 class Partido(Base):
     __tablename__ = "partidos"
@@ -79,16 +52,4 @@ class Estadistica(Base):
     fecha_registro = Column(DateTime, default=datetime.utcnow)
 
     jugador = relationship("Jugador", back_populates="estadisticas")
-    partido = relationship("Partido", back_populates="estadisticas")
-
-class Asignacion(Base):
-    __tablename__ = "asignaciones"
-
-    id = Column(Integer, primary_key=True, index=True)
-    jugador_id = Column(Integer, ForeignKey("jugadores.id"))
-    elemento_id = Column(Integer, ForeignKey("elementos.id"))
-    fecha_asignacion = Column(Date, default=date.today)
-    activo = Column(Boolean, default=True)
-
-    jugador = relationship("Jugador", back_populates="asignaciones")
-    elemento = relationship("Elemento", back_populates="asignaciones") 
+    partido = relationship("Partido", back_populates="estadisticas") 

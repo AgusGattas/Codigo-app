@@ -14,10 +14,8 @@ import {
 } from '@mui/material';
 import Image from 'next/image';
 import { useQuery } from 'react-query';
-import { getJugadores, getElementos, getAsignacionesPendientes, getResumenEstadisticas } from '../services/api';
+import { getJugadores, getResumenEstadisticas } from '../services/api';
 import JugadoresList from '../components/JugadoresList';
-import ElementosList from '../components/ElementosList';
-import AsignacionesList from '../components/AsignacionesList';
 import PartidosList from '../components/PartidosList';
 import EstadisticasList from '../components/EstadisticasList';
 
@@ -55,8 +53,6 @@ export default function Home() {
     const [sortDesc, setSortDesc] = useState<boolean>(true);
 
     const { data: jugadores = [] } = useQuery('jugadores', getJugadores);
-    const { data: elementos = [] } = useQuery('elementos', getElementos);
-    const { data: asignaciones = [] } = useQuery('asignaciones', getAsignacionesPendientes);
     const { data: estadisticas = [] } = useQuery(
         ['estadisticas', sortField, sortDesc],
         () => getResumenEstadisticas(sortField, sortDesc)
@@ -246,8 +242,6 @@ export default function Home() {
                             }}
                         >
                             <Tab label="Jugadores" />
-                            <Tab label="Elementos" />
-                            <Tab label="Asignaciones" />
                             <Tab label="Partidos" />
                             <Tab label="Estadísticas" />
                         </Tabs>
@@ -256,15 +250,9 @@ export default function Home() {
                             <JugadoresList jugadores={jugadores} />
                         </TabPanel>
                         <TabPanel value={tabValue} index={1}>
-                            <ElementosList elementos={elementos} />
-                        </TabPanel>
-                        <TabPanel value={tabValue} index={2}>
-                            <AsignacionesList asignaciones={asignaciones} />
-                        </TabPanel>
-                        <TabPanel value={tabValue} index={3}>
                             <PartidosList />
                         </TabPanel>
-                        <TabPanel value={tabValue} index={4}>
+                        <TabPanel value={tabValue} index={2}>
                             <EstadisticasList 
                                 estadisticas={estadisticas} 
                                 onSort={handleSort}

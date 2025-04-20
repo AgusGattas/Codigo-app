@@ -19,12 +19,14 @@ import {
     TextField,
     FormControlLabel,
     Switch,
-    alpha
+    alpha,
+    Tabs,
+    Tab
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { Partido, Estadistica, Jugador } from '../types/index';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { getPartidos, createPartido, deletePartido, getJugadores, registrarEstadisticasMultiple, getEstadisticasPartido } from '../services/api';
+import { getPartidos, createPartido, deletePartido, getJugadores, registrarEstadisticasMultiple, getEstadisticasPartido, updatePartido } from '../services/api';
 
 // Agregamos el estilo para la fuente musical
 const musicalStyle = {
@@ -41,6 +43,7 @@ const PartidosList: React.FC = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [editDialog, setEditDialog] = useState(false);
     const [selectedPartido, setSelectedPartido] = useState<Partido | null>(null);
+    const [tabValue, setTabValue] = useState(0);
     const queryClient = useQueryClient();
 
     const { data: partidos = [] } = useQuery('partidos', getPartidos);
@@ -63,6 +66,16 @@ const PartidosList: React.FC = () => {
             setOpenDialog(false);
         }
     });
+
+    const updatePartidoMutation = useMutation(
+        (data: { id: number; partido: Omit<Partido, 'id'> }) =>
+            updatePartido(data.id, data.partido),
+        {
+            onSuccess: () => {
+                queryClient.invalidateQueries('partidos');
+            }
+        }
+    );
 
     const deletePartidoMutation = useMutation(deletePartido, {
         onSuccess: () => {
@@ -113,7 +126,14 @@ const PartidosList: React.FC = () => {
 
     const handleEditPartido = async (partido: Partido) => {
         setSelectedPartido(partido);
-        setEditDialog(true);
+        setPartidoData({
+            fecha: new Date(partido.fecha).toISOString().split('T')[0],
+            rival: partido.rival,
+            resultado_local: partido.resultado_local,
+            resultado_visitante: partido.resultado_visitante,
+            lugar: partido.lugar,
+            tipo: partido.tipo
+        });
         
         try {
             const estadisticasPartido = await getEstadisticasPartido(partido.id);
@@ -135,16 +155,29 @@ const PartidosList: React.FC = () => {
             console.error('Error al cargar las estadísticas:', error);
             setEstadisticasData({});
         }
+        
+        setEditDialog(true);
+        setTabValue(0);
     };
 
-    const handleCloseEditDialog = () => {
-        setEditDialog(false);
-        setSelectedPartido(null);
-        setEstadisticasData({});
-    };
-
-    const handleSubmitEstadisticas = () => {
+    const handleSubmitEdit = () => {
         if (selectedPartido) {
+            // Actualizar datos del partido
+            if (partidoData.rival) {
+                updatePartidoMutation.mutate({
+                    id: selectedPartido.id,
+                    partido: {
+                        fecha: new Date(partidoData.fecha!).toISOString(),
+                        rival: partidoData.rival,
+                        resultado_local: partidoData.resultado_local,
+                        resultado_visitante: partidoData.resultado_visitante,
+                        lugar: partidoData.lugar || '',
+                        tipo: partidoData.tipo || 'PARTIDO'
+                    } as Omit<Partido, 'id'>
+                });
+            }
+            
+            // Actualizar estadísticas
             const estadisticas = Object.entries(estadisticasData).map(([jugadorId, data]) => ({
                 jugador_id: parseInt(jugadorId),
                 partido_id: selectedPartido.id,
@@ -160,10 +193,27 @@ const PartidosList: React.FC = () => {
         }
     };
 
+    const handleCloseEditDialog = () => {
+        setEditDialog(false);
+        setSelectedPartido(null);
+        setPartidoData({
+            fecha: new Date().toISOString().split('T')[0],
+            rival: '',
+            resultado_local: null,
+            resultado_visitante: null,
+            lugar: '',
+            tipo: 'PARTIDO'
+        });
+        setEstadisticasData({});
+        setTabValue(0);
+    };
+
+    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+        setTabValue(newValue);
+    };
+
     return (
         <Box>
-            
-            
             <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="h6" component="h2">
                     Partidos
@@ -278,7 +328,7 @@ const PartidosList: React.FC = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* Dialog para editar estadísticas del partido */}
+            {/* Dialog para editar partido y estadísticas */}
             <Dialog 
                 open={editDialog} 
                 onClose={handleCloseEditDialog}
@@ -286,105 +336,155 @@ const PartidosList: React.FC = () => {
                 fullWidth
             >
                 <DialogTitle>
-                    Estadísticas del Partido - {selectedPartido?.rival}
+                    Editar Partido - {selectedPartido?.rival}
                 </DialogTitle>
                 <DialogContent>
-                    <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        {jugadores.map((jugador) => (
-                            <Box key={jugador.id} sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                <Typography sx={{ minWidth: 150 }}>{jugador.nombre}</Typography>
-                                <TextField
-                                    label="Goles"
-                                    type="number"
-                                    size="small"
-                                    sx={{ width: 100 }}
-                                    value={estadisticasData[jugador.id]?.goles || 0}
-                                    onChange={(e) => setEstadisticasData({
-                                        ...estadisticasData,
-                                        [jugador.id]: {
-                                            ...estadisticasData[jugador.id],
-                                            goles: parseInt(e.target.value) || 0
-                                        }
-                                    })}
-                                />
-                                <TextField
-                                    label="Asistencias"
-                                    type="number"
-                                    size="small"
-                                    sx={{ width: 100 }}
-                                    value={estadisticasData[jugador.id]?.asistencias || 0}
-                                    onChange={(e) => setEstadisticasData({
-                                        ...estadisticasData,
-                                        [jugador.id]: {
-                                            ...estadisticasData[jugador.id],
-                                            asistencias: parseInt(e.target.value) || 0
-                                        }
-                                    })}
-                                />
-                                <TextField
-                                    label="Amarillas"
-                                    type="number"
-                                    size="small"
-                                    sx={{ width: 100 }}
-                                    value={estadisticasData[jugador.id]?.tarjetas_amarillas || 0}
-                                    onChange={(e) => setEstadisticasData({
-                                        ...estadisticasData,
-                                        [jugador.id]: {
-                                            ...estadisticasData[jugador.id],
-                                            tarjetas_amarillas: parseInt(e.target.value) || 0
-                                        }
-                                    })}
-                                />
-                                <TextField
-                                    label="Rojas"
-                                    type="number"
-                                    size="small"
-                                    sx={{ width: 100 }}
-                                    value={estadisticasData[jugador.id]?.tarjetas_rojas || 0}
-                                    onChange={(e) => setEstadisticasData({
-                                        ...estadisticasData,
-                                        [jugador.id]: {
-                                            ...estadisticasData[jugador.id],
-                                            tarjetas_rojas: parseInt(e.target.value) || 0
-                                        }
-                                    })}
-                                />
-                                <TextField
-                                    label="Minutos"
-                                    type="number"
-                                    size="small"
-                                    sx={{ width: 100 }}
-                                    value={estadisticasData[jugador.id]?.minutos_jugados || 0}
-                                    onChange={(e) => setEstadisticasData({
-                                        ...estadisticasData,
-                                        [jugador.id]: {
-                                            ...estadisticasData[jugador.id],
-                                            minutos_jugados: parseInt(e.target.value) || 0
-                                        }
-                                    })}
-                                />
-                                <FormControlLabel
-                                    control={
-                                        <Switch
-                                            checked={estadisticasData[jugador.id]?.titular || false}
-                                            onChange={(e) => setEstadisticasData({
-                                                ...estadisticasData,
-                                                [jugador.id]: {
-                                                    ...estadisticasData[jugador.id],
-                                                    titular: e.target.checked
-                                                }
-                                            })}
-                                        />
-                                    }
-                                    label="Titular"
-                                />
-                            </Box>
-                        ))}
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+                        <Tabs value={tabValue} onChange={handleTabChange} aria-label="editar partido tabs">
+                            <Tab label="Datos del Partido" />
+                            <Tab label="Estadísticas" />
+                        </Tabs>
                     </Box>
+                    
+                    {tabValue === 0 && (
+                        <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <TextField
+                                label="Fecha"
+                                type="date"
+                                value={partidoData.fecha}
+                                onChange={(e) => setPartidoData({ ...partidoData, fecha: e.target.value })}
+                                fullWidth
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            />
+                            <TextField
+                                label="Rival"
+                                value={partidoData.rival}
+                                onChange={(e) => setPartidoData({ ...partidoData, rival: e.target.value })}
+                                fullWidth
+                            />
+                            <TextField
+                                label="Lugar"
+                                value={partidoData.lugar}
+                                onChange={(e) => setPartidoData({ ...partidoData, lugar: e.target.value })}
+                                fullWidth
+                            />
+                            <TextField
+                                label="Goles Local"
+                                type="number"
+                                value={partidoData.resultado_local || ''}
+                                onChange={(e) => setPartidoData({ ...partidoData, resultado_local: e.target.value ? parseInt(e.target.value) : null })}
+                                fullWidth
+                            />
+                            <TextField
+                                label="Goles Visitante"
+                                type="number"
+                                value={partidoData.resultado_visitante || ''}
+                                onChange={(e) => setPartidoData({ ...partidoData, resultado_visitante: e.target.value ? parseInt(e.target.value) : null })}
+                                fullWidth
+                            />
+                        </Box>
+                    )}
+                    
+                    {tabValue === 1 && (
+                        <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            {jugadores.map((jugador) => (
+                                <Box key={jugador.id} sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                    <Typography sx={{ minWidth: 150 }}>{jugador.nombre}</Typography>
+                                    <TextField
+                                        label="Goles"
+                                        type="number"
+                                        size="small"
+                                        sx={{ width: 100 }}
+                                        value={estadisticasData[jugador.id]?.goles || 0}
+                                        onChange={(e) => setEstadisticasData({
+                                            ...estadisticasData,
+                                            [jugador.id]: {
+                                                ...estadisticasData[jugador.id],
+                                                goles: parseInt(e.target.value) || 0
+                                            }
+                                        })}
+                                    />
+                                    <TextField
+                                        label="Asistencias"
+                                        type="number"
+                                        size="small"
+                                        sx={{ width: 100 }}
+                                        value={estadisticasData[jugador.id]?.asistencias || 0}
+                                        onChange={(e) => setEstadisticasData({
+                                            ...estadisticasData,
+                                            [jugador.id]: {
+                                                ...estadisticasData[jugador.id],
+                                                asistencias: parseInt(e.target.value) || 0
+                                            }
+                                        })}
+                                    />
+                                    <TextField
+                                        label="Amarillas"
+                                        type="number"
+                                        size="small"
+                                        sx={{ width: 100 }}
+                                        value={estadisticasData[jugador.id]?.tarjetas_amarillas || 0}
+                                        onChange={(e) => setEstadisticasData({
+                                            ...estadisticasData,
+                                            [jugador.id]: {
+                                                ...estadisticasData[jugador.id],
+                                                tarjetas_amarillas: parseInt(e.target.value) || 0
+                                            }
+                                        })}
+                                    />
+                                    <TextField
+                                        label="Rojas"
+                                        type="number"
+                                        size="small"
+                                        sx={{ width: 100 }}
+                                        value={estadisticasData[jugador.id]?.tarjetas_rojas || 0}
+                                        onChange={(e) => setEstadisticasData({
+                                            ...estadisticasData,
+                                            [jugador.id]: {
+                                                ...estadisticasData[jugador.id],
+                                                tarjetas_rojas: parseInt(e.target.value) || 0
+                                            }
+                                        })}
+                                    />
+                                    <TextField
+                                        label="Minutos"
+                                        type="number"
+                                        size="small"
+                                        sx={{ width: 100 }}
+                                        value={estadisticasData[jugador.id]?.minutos_jugados || 0}
+                                        onChange={(e) => setEstadisticasData({
+                                            ...estadisticasData,
+                                            [jugador.id]: {
+                                                ...estadisticasData[jugador.id],
+                                                minutos_jugados: parseInt(e.target.value) || 0
+                                            }
+                                        })}
+                                    />
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                checked={estadisticasData[jugador.id]?.titular || false}
+                                                onChange={(e) => setEstadisticasData({
+                                                    ...estadisticasData,
+                                                    [jugador.id]: {
+                                                        ...estadisticasData[jugador.id],
+                                                        titular: e.target.checked
+                                                    }
+                                                })}
+                                            />
+                                        }
+                                        label="Titular"
+                                    />
+                                </Box>
+                            ))}
+                        </Box>
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseEditDialog}>Cancelar</Button>
-                    <Button onClick={handleSubmitEstadisticas} variant="contained">Guardar Estadísticas</Button>
+                    <Button onClick={handleSubmitEdit} variant="contained">Guardar</Button>
                 </DialogActions>
             </Dialog>
         </Box>

@@ -3,13 +3,6 @@ export enum TipoEvento {
     PARTIDO = "PARTIDO"
 }
 
-export enum TipoElemento {
-    PELOTA = "PELOTA",
-    PECHERA = "PECHERA",
-    AGUA = "AGUA",
-    CONJUNTO = "CONJUNTO"
-}
-
 export interface Jugador {
     id: number;
     nombre: string;
@@ -22,24 +15,6 @@ export interface Asistencia {
     fecha: string;
     tipo: TipoEvento;
     presente: boolean;
-}
-
-export interface Elemento {
-    id: number;
-    nombre: string;
-    descripcion?: string;
-    tipo: TipoElemento;
-    cantidad: number;
-    activo: boolean;
-}
-
-export interface ElementoAsignado {
-    id: number;
-    jugador_id: number;
-    elemento_id: number;
-    fecha_asignacion: string;
-    fecha_devolucion?: string;
-    devuelto: boolean;
 }
 
 export interface Partido {
@@ -86,12 +61,4 @@ export interface EstadisticasPartido {
     lugar: string;
     tipo: string;
     jugadores: Estadistica[];
-}
-
-export interface Asignacion {
-    id: number;
-    jugador_id: number;
-    elemento_id: number;
-    fecha_asignacion: string;
-    activo: boolean;
 } 
