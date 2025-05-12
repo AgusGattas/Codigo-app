@@ -1,0 +1,68 @@
+[tool.poetry]
+name = "futbol-app"
+version = "0.0.1"
+description = "Aplicación de fútbol"
+authors = ["Agustín Marchi <agusmdev@gmail.com>"]
+license = "LICENSE"
+readme = "README.md"
+
+packages = [
+    { include = "app/**/*.py" },
+]
+exclude = ["tests/*"]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.12"
+fastapi = "0.112.0"
+python-dotenv = "^0.21.1"
+psycopg2-binary = "^2.9.9"
+sqlalchemy = "^2.0.22"
+pydantic-settings = "^2.0.3"
+pydantic = {extras = ["email"], version = "^2.5.2"}
+python-jose = "^3.3.0"
+fastapi-injector = "^0.5.3"
+fastapi-filter = {extras = ["sqlalchemy"], version = "^1.0.0"}
+fastapi-pagination = "^0.12.13"
+python-multipart = "^0.0.9"
+alembic = "^1.12.1"
+requests = "^2.32.3"
+axiom-py = "^0.9.0"
+
+[tool.poetry.group.dev.dependencies]
+uvicorn = "^0.23.2"
+pytest = "^7.2.1"
+pytest-asyncio = "^0.20.3"
+pytest-cov = "^4.0.0"
+
+[build-system]
+requires = [
+    "poetry-core>=1.0.0"
+]
+
+[tool.black]
+line-length = 100
+
+[tool.ruff]
+line-length = 100
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+] 

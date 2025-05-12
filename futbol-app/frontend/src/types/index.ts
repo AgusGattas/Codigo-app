@@ -1,20 +1,30 @@
 export enum TipoEvento {
-    ENTRENAMIENTO = "ENTRENAMIENTO",
-    PARTIDO = "PARTIDO"
+    PARTIDO = 'PARTIDO',
+    ENTRENAMIENTO = 'ENTRENAMIENTO',
+    TORNEO = 'TORNEO'
 }
 
 export interface Jugador {
     id: number;
     nombre: string;
+    apellido: string;
+    fecha_nacimiento: string;
+    posicion: string;
+    numero: number;
     activo: boolean;
+    created_at: string;
+    updated_at: string | null;
 }
 
 export interface Asistencia {
     id: number;
     jugador_id: number;
-    fecha: string;
-    tipo: TipoEvento;
+    partido_id: number;
     presente: boolean;
+    justificacion: string | null;
+    created_at: string;
+    updated_at: string | null;
+    jugador: Jugador;
 }
 
 export interface Partido {
@@ -24,7 +34,9 @@ export interface Partido {
     resultado_local: number | null;
     resultado_visitante: number | null;
     lugar: string;
-    tipo: string;
+    tipo: TipoEvento;
+    created_at: string;
+    updated_at: string | null;
 }
 
 export interface Estadistica {
@@ -37,12 +49,14 @@ export interface Estadistica {
     tarjetas_rojas: number;
     minutos_jugados: number;
     titular: boolean;
-    fecha_registro: string;
+    created_at: string;
+    updated_at: string | null;
 }
 
 export interface EstadisticasJugador {
     jugador_id: number;
-    nombre_jugador: string;
+    nombre: string;
+    apellido: string;
     total_partidos: number;
     total_goles: number;
     total_asistencias: number;
