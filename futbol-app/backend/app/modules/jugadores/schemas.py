@@ -2,12 +2,14 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class JugadorBase(BaseModel):
     nombre: str
     apellido: str
+    email: EmailStr
+    fecha_ficha_medica: datetime
     fecha_nacimiento: datetime
     posicion: str
     numero: int

@@ -1,22 +1,14 @@
 from sqlalchemy import or_
 from app.modules.jugadores.models import Jugador
+from fastapi_filter.contrib.sqlalchemy import Filter
 
-class JugadorFilters:
-    @staticmethod
-    def apply_filters(query, filters: dict):
-        if filters.get('search'):
-            search = f"%{filters['search']}%"
-            query = query.filter(
-                or_(
-                    Jugador.nombre.ilike(search),
-                    Jugador.apellido.ilike(search)
-                )
-            )
+
+class JugadorFilters(Filter):
+    nombre: str | None = None
+    apellido: str | None = None
+    activo: bool | None = None
+    numero: int | None = None
+    
+    class Constants(Filter.Constants):
+        model = Jugador
         
-        if filters.get('activo') is not None:
-            query = query.filter(Jugador.activo == filters['activo'])
-            
-        if filters.get('numero'):
-            query = query.filter(Jugador.numero == filters['numero'])
-            
-        return query 

@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Optional, Dict
 from enum import Enum
 from pydantic import BaseModel, ConfigDict
@@ -8,15 +8,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 
 class TimestampMixin:
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(tz=UTC), index=True
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        onupdate=lambda: datetime.now(tz=UTC),
-        default=lambda: datetime.now(tz=UTC),
-        index=True,
-    )
+    created_at: datetime = datetime.now(timezone.utc)
+    updated_at: datetime = datetime.now(timezone.utc)
 
 
 class JSONUpdatesMixing:

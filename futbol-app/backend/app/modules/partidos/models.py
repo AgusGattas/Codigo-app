@@ -21,5 +21,4 @@ class Partido(TimestampMixin, Base):
     tipo: Mapped[str] = mapped_column(String(50))
 
     # Relaciones
-    asistencias: Mapped[List["Asistencia"]] = relationship(back_populates="partido", cascade="all, delete-orphan")
-    estadisticas: Mapped[List["Estadistica"]] = relationship(back_populates="partido", cascade="all, delete-orphan") 
+    asistencias: Mapped[List["Asistencia"]] = relationship("Asistencia", back_populates="partido", lazy="joined", cascade="all, delete-orphan") 

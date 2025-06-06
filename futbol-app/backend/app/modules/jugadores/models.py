@@ -1,3 +1,4 @@
+from __future__ import annotations
 from datetime import datetime
 from typing import List
 from uuid import UUID, uuid4
@@ -12,6 +13,8 @@ class Jugador(TimestampMixin, Base):
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     nombre: Mapped[str] = mapped_column(String(100))
     apellido: Mapped[str] = mapped_column(String(100))
+    mail: Mapped[str] = mapped_column(String(100))
+    fecha_ficha_medica: Mapped[datetime] = mapped_column()
     fecha_nacimiento: Mapped[datetime] = mapped_column()
     posicion: Mapped[str] = mapped_column(String(50))
     numero: Mapped[int] = mapped_column(unique=True)
@@ -20,5 +23,4 @@ class Jugador(TimestampMixin, Base):
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relaciones
-    estadisticas: Mapped[List["Estadistica"]] = relationship("Estadistica", back_populates="jugador", cascade="all, delete-orphan")
-    asistencias: Mapped[List["Asistencia"]] = relationship("Asistencia", back_populates="jugador", cascade="all, delete-orphan") 
+    asistencias: Mapped[List["Asistencia"]] = relationship("Asistencia", back_populates="jugador", lazy="joined", cascade="all, delete-orphan") 

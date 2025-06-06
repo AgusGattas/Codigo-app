@@ -33,7 +33,7 @@ interface JugadoresListProps {
     jugadores: Jugador[];
 }
 
-export default function JugadoresList({ jugadores }: JugadoresListProps) {
+export default function JugadoresList({ jugadores = [] }: JugadoresListProps) {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [open, setOpen] = useState(false);
@@ -88,10 +88,24 @@ export default function JugadoresList({ jugadores }: JugadoresListProps) {
         if (editJugador) {
             updateMutation.mutate({
                 id: editJugador.id,
-                jugador: { nombre, activo: true }
+                jugador: { 
+                    nombre,
+                    apellido: editJugador.apellido,
+                    fecha_nacimiento: editJugador.fecha_nacimiento,
+                    posicion: editJugador.posicion,
+                    numero: editJugador.numero,
+                    activo: true
+                }
             });
         } else {
-            createMutation.mutate({ nombre, activo: true });
+            createMutation.mutate({ 
+                nombre,
+                apellido: '',
+                fecha_nacimiento: new Date().toISOString().split('T')[0],
+                posicion: '',
+                numero: 0,
+                activo: true
+            });
         }
     };
 
@@ -200,15 +214,17 @@ export default function JugadoresList({ jugadores }: JugadoresListProps) {
             sx={{ 
                 borderRadius: 2,
                 overflow: 'hidden',
-                boxShadow: theme.shadows[2]
+                boxShadow: theme.shadows[2],
+                maxWidth: '100%',
+                overflowX: 'auto'
             }}
         >
             <Table>
                 <TableHead>
                     <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.05) }}>
-                        <TableCell sx={{ fontWeight: 600 }}>Jugador</TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>Estado</TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>Acciones</TableCell>
+                        <TableCell sx={{ fontWeight: 600, minWidth: 200 }}>Jugador</TableCell>
+                        <TableCell sx={{ fontWeight: 600, minWidth: 120 }}>Estado</TableCell>
+                        <TableCell sx={{ fontWeight: 600, minWidth: 100 }}>Acciones</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -301,15 +317,14 @@ export default function JugadoresList({ jugadores }: JugadoresListProps) {
                 </Typography>
                 <Button
                     variant="contained"
-                    color="primary"
-                    onClick={() => handleOpen()}
                     startIcon={<AddIcon />}
+                    onClick={() => handleOpen()}
                     sx={{
-                        borderRadius: 2,
-                        textTransform: 'none',
-                        px: 3,
-                        py: 1,
-                        width: { xs: '100%', sm: 'auto' }
+                        background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                        color: 'white',
+                        '&:hover': {
+                            background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`
+                        }
                     }}
                 >
                     Agregar Jugador
@@ -360,8 +375,11 @@ export default function JugadoresList({ jugadores }: JugadoresListProps) {
                         onClick={handleSubmit} 
                         variant="contained"
                         sx={{
-                            textTransform: 'none',
-                            px: 3
+                            background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                            color: 'white',
+                            '&:hover': {
+                                background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`
+                            }
                         }}
                     >
                         {editJugador ? 'Guardar' : 'Crear'}

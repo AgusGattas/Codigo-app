@@ -18,6 +18,7 @@ import { getJugadores, getResumenEstadisticas } from '../services/api';
 import JugadoresList from '../components/JugadoresList';
 import PartidosList from '../components/PartidosList';
 import EstadisticasList from '../components/EstadisticasList';
+import { Jugador, EstadisticasJugador } from '../types';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -52,7 +53,8 @@ export default function Home() {
     const [sortField, setSortField] = useState('goles');
     const [sortDesc, setSortDesc] = useState(true);
 
-    const { data: estadisticas = [] } = useQuery('estadisticas', getResumenEstadisticas);
+    const { data: estadisticas = [] } = useQuery<EstadisticasJugador[]>('estadisticas', () => getResumenEstadisticas(sortField, sortDesc));
+    const { data: jugadores = [] } = useQuery<Jugador[]>('jugadores', getJugadores);
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
@@ -69,11 +71,36 @@ export default function Home() {
 
     return (
         <Box sx={{ flexGrow: 1 }}>
-            <AppBar position="static" sx={{ backgroundColor: theme.palette.primary.main }}>
-                <Toolbar>
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        Fútbol App
-                    </Typography>
+            <AppBar position="static" sx={{ 
+                background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                boxShadow: theme.shadows[3]
+            }}>
+                <Toolbar sx={{ justifyContent: 'center' }}>
+                    <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 3,
+                        py: 1
+                    }}>
+                        <Image
+                            src="/images/logo.png"
+                            alt="Logo Fútbol App"
+                            width={60}
+                            height={60}
+                            style={{ borderRadius: '50%' }}
+                        />
+                        <Typography 
+                            variant="h4" 
+                            component="div" 
+                            sx={{ 
+                                color: 'white',
+                                fontWeight: 600,
+                                letterSpacing: '0.5px'
+                            }}
+                        >
+                            Fútbol App
+                        </Typography>
+                    </Box>
                 </Toolbar>
             </AppBar>
 
@@ -100,7 +127,7 @@ export default function Home() {
                     </Tabs>
 
                     <TabPanel value={tabValue} index={0}>
-                        <JugadoresList />
+                        <JugadoresList jugadores={jugadores} />
                     </TabPanel>
 
                     <TabPanel value={tabValue} index={1}>

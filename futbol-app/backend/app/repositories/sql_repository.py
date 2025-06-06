@@ -17,7 +17,6 @@ from sqlalchemy.orm import load_only
 
 from app.database.base import Base, DatabaseResource
 from app.modules.db import select_from_pydantic
-
 from app.repositories.base_repository import BaseRepository
 from app.repositories.clauses import (
     OnConflictClause,

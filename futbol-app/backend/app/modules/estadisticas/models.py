@@ -1,3 +1,4 @@
+from __future__ import annotations
 import uuid
 
 from sqlalchemy import ForeignKey
@@ -9,8 +10,8 @@ class Estadistica(TimestampMixin, Base):
     __tablename__ = "estadisticas"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    jugador_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("jugadores.id"))
-    partido_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("partidos.id"))
+    jugador_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("jugadores.id", ondelete="CASCADE"))
+    partido_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("partidos.id", ondelete="CASCADE"))
     goles: Mapped[int] = mapped_column(default=0)
     asistencias: Mapped[int] = mapped_column(default=0)
     tarjetas_amarillas: Mapped[int] = mapped_column(default=0)
@@ -19,5 +20,5 @@ class Estadistica(TimestampMixin, Base):
     titular: Mapped[bool] = mapped_column(default=False)
 
     # Relaciones
-    jugador: Mapped["Jugador"] = relationship("Jugador", back_populates="estadisticas")
-    partido: Mapped["Partido"] = relationship("Partido", back_populates="estadisticas") 
+    jugador: Mapped["Jugador"] = relationship("Jugador", backref="estadisticas", lazy="joined")
+    partido: Mapped["Partido"] = relationship("Partido", backref="estadisticas", lazy="joined") 

@@ -3,6 +3,7 @@
 from pydantic import Field
 from pydantic.json_schema import SkipJsonSchema
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Union, Optional
 
 NoSchemaNone = SkipJsonSchema[
     None
@@ -76,10 +77,12 @@ class AWSSettings(BaseSettings):
     ASSETS_BUCKET: str = "taller-echo"
     # AWS_ACCESS_KEY_ID: str | None = None ## Forbidden variables for AWS Services (since you should use role based permissions)
     # AWS_SECRET_ACCESS_KEY: str | None = None
-    S3_ACCESS_KEY_ID: str | None = None
-    S3_SECRET_ACCESS_KEY: str | None = None
+    S3_ACCESS_KEY_ID: Optional[str] = None
+    S3_SECRET_ACCESS_KEY: Optional[str] = None
+    S3_BUCKET_NAME: Optional[str] = None
+    S3_REGION: Optional[str] = None
     REGION_NAME: str = "us-east-1"
-    ENDPOINT_URL: str | None = None
+    ENDPOINT_URL: Optional[str] = None
     CDN_URL: str = "https://d1a324xj07l38i.cloudfront.net"
 
 

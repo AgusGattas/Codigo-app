@@ -35,11 +35,6 @@ def create_sqlalchemy_engine(*, db_url: str, pool_size: int) -> Engine:
         echo=settings.DEBUG_MODE,
         pool_size=pool_size,
         max_overflow=100,
-        connect_args={
-            "keepalives": 1,
-            "keepalives_idle": 30,
-            "keepalives_interval": 10,
-        },
     )
 
 

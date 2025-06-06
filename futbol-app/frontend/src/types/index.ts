@@ -12,8 +12,8 @@ export interface Jugador {
     posicion: string;
     numero: number;
     activo: boolean;
-    created_at: string;
-    updated_at: string | null;
+    created_at?: string;
+    updated_at?: string | null;
 }
 
 export interface Asistencia {
